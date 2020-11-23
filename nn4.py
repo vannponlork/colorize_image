@@ -11,20 +11,14 @@ import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
-from networknn4 import Generator, Discriminator
-from model import UNet, DNet
+from networknn13 import Generator, Discriminator
 import numpy as np
-import cv2
 from torchsummary import summary
-from shutil import rmtree
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
-
-
-
-
 workers = 0
-num_epochs = 10000
+num_epochs = 1000
 lr = 0.001
 beta1 = 0.5
 ngpu = 1
@@ -33,8 +27,9 @@ tar = 0
 device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
 use_cuda = True if (torch.cuda.is_available() and ngpu > 0) else False
 
-GEN_MODEL_PATH = './model/gen.pt'
-DISC_MODEL_PATH = './model/dis.pt'
+GEN_MODEL_PATH = './model/gen_nn13.pt'
+DISC_MODEL_PATH = './model/dis_nn13.pt'
+epoch_note = './modelnn1/epoch_note.pt'
 epoch_note = './modelnn1/epoch_note.pt'
 print("Train process start...")
 
@@ -47,7 +42,7 @@ def count_data(path):
     return i
 if torch.cuda.is_available():
     dataroot = "../Dataset/dataset_color_image_gpu/"
-    batch_size = 2
+    batch_size = 10
     image_size = 256
     print('image to train %s' % count_data(dataroot))
 else:
@@ -80,23 +75,20 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 
-
-
-print('==' * 100)
 netg = Generator(ngpu, use_cuda).to(device)
-summary(netg, (1, image_size, image_size))
 
+summary(netg, (1, image_size, image_size))
 
 if (device.type == 'cuda') and (ngpu > 1):
     netg = nn.DataParallel(netg, list(range(ngpu)))
 netg.apply(weights_init)
 
 netd = Discriminator(ngpu, use_cuda).to(device)
-summary(netd, (3, image_size, image_size))
+summary(netd, (4, image_size, image_size))
 
 if (device.type == 'cuda') and (ngpu > 1):
     netd = nn.DataParallel(netd, list(range(ngpu)))
-netd.apply(weights_init)
+    netd.apply(weights_init)
 
 criterion = nn.MSELoss()
 d_criterion = nn.BCELoss()
@@ -107,15 +99,16 @@ g_criterion_2 = nn.MSELoss()
 real_label = 1.
 fake_label = 0.
 
-optimizerD = optim.Adam(netd.parameters(), lr=0.0002, betas=(beta1, 0.999))
-optimizerG = optim.Adam(netg.parameters(), lr=0.0002, betas=(beta1, 0.999))
+optimizerD = optim.Adam(netd.parameters(), lr=0.0002, betas=(beta1, 0.5))
+optimizerG = optim.Adam(netg.parameters(), lr=0.0002, betas=(beta1, 0.5))
 
 img_list = []
 g_losses = []
 d_losses = []
 
 iters = 0
-g_lambda = 1000
+g_lambda = 100
+
 d_running_loss = 0.0
 g_running_loss = 0.0
 
@@ -235,77 +228,72 @@ writer = SummaryWriter()
 
 for epoch in range(1, num_epochs):
     for i, data in enumerate(dataloader_train):
-        netd.zero_grad()
+        # netd.zero_grad()
+        netg.zero_grad()
         if j > len(test_data) - 1:
             j = 0
         x_batch = data[0].to(device)
         y_batch = test_data[j][0].to(device)
-        # l_images = convert_grey_image(x_batch)
-        # l_images_test = convert_grey_image(y_batch)
 
         real_image = x_batch
-        grey_image, c_image = get_l_and_ab_color(x_batch)
-        grey_image_test, c_image_test = get_l_and_ab_color(y_batch)
+        grey_image, ab_color = get_l_and_ab_color(x_batch)
+        real_image_lab = torch.cat([grey_image, ab_color], 1)
+        grey_image_test, ab_color_test = get_l_and_ab_color(y_batch)
 
         g_output_ab = netg(grey_image)
         g_output_ab_test = netg(grey_image_test)
 
-        fake_image = torch.cat([grey_image, g_output_ab], 1)
-        fake_image_test = torch.cat([grey_image_test, g_output_ab_test], 1)
+        fake_image_lab = torch.cat([grey_image, g_output_ab], 1)
+        fake_image_test_lab = torch.cat([grey_image_test, g_output_ab_test], 1)
 
-        lab_two_rgb = merge_convert_lab2rgb(fake_image)
-        lab_two_rgb_test = merge_convert_lab2rgb(fake_image_test)
+        lab_two_rgb = merge_convert_lab2rgb(fake_image_lab)
+        lab_two_rgb_test = merge_convert_lab2rgb(fake_image_test_lab)
 
+        d_real_logits = netd(torch.cat([grey_image, real_image_lab], 1)).view(-1)
 
-        label_real = torch.full((real_image.size(0),), real_label, device=device)
-        label_fake = torch.full((fake_image.size(0),), fake_label, device=device)
-
-        d_real_logits = netd(torch.cat([grey_image, c_image], 1))
-        D_x = d_real_logits.mean().item()
+        label_real = torch.full((d_real_logits.size(0),), real_label, device=device)
+        label_fake = torch.full((d_real_logits.size(0),), fake_label, device=device)
 
         d_real_loss = d_criterion(d_real_logits, label_real)
-        d_fake_logits = netd(torch.cat([grey_image, g_output_ab], 1))
-        d_fake_loss = d_criterion(d_fake_logits, label_fake)
-        D_G_z1 = d_fake_logits.mean().item()
-        d_loss = d_real_loss + d_fake_loss
 
+        d_fake_logits = netd(torch.cat([grey_image, fake_image_lab], 1)).view(-1)
+        d_fake_loss = d_criterion(d_fake_logits, label_fake)
+        d_loss = d_real_loss + d_fake_loss
         d_loss.backward(retain_graph=True)
         optimizerD.step()
         netg.zero_grad()
 
-        g_real_logits = netd(torch.cat([grey_image, g_output_ab], 1))
+        g_real_logits = netd(torch.cat([grey_image, fake_image_lab], 1)).view(-1)
 
-        g_real_loss = g_criterion_1(g_real_logits, (torch.ones(batch_size).to(device)))
-        g_mse = g_criterion_2(g_output_ab, c_image)
-        g_image_distance_loss = g_lambda * g_criterion_2(g_output_ab, c_image)
+        g_real_loss = g_criterion_1(g_real_logits, label_real)
+        g_mse = g_criterion_2(torch.cat([grey_image, fake_image_lab], 1), torch.cat([grey_image, real_image_lab], 1))
+        g_image_distance_loss = g_lambda * g_criterion_2(torch.cat([grey_image, fake_image_lab], 1), torch.cat([grey_image, real_image_lab], 1))
         g_loss = g_real_loss + g_image_distance_loss
         g_loss.backward()
         optimizerG.step()
 
-        D_G_z2 = g_real_logits.mean().item()
-
         d_real = d_real_loss
         d_fake = d_fake_loss
-        if i % 1 == 0:
-           print('[Epoch:{} Step:{}] <--> d_loss:{} g_lambda: {} g_loss: {} g_real_loss:{}'
-                 ' g_image_distance_loss: {} g_mse: {}'
-                 .format(epoch, i+1, d_loss, g_lambda, g_loss, g_real_loss, g_image_distance_loss, g_mse))
-        # add_to_summary(lab_two_rgb, lab_two_rgb_test, grey_image, d_loss, d_fake, d_real,
-        #                g_loss, fake_image, fake_image_test, writer, x_batch, y_batch)
 
-        add_to_summary(lab_two_rgb, lab_two_rgb_test, grey_image, d_loss, d_fake, d_real,
-                       g_loss, fake_image, fake_image_test, writer, x_batch, y_batch)
+        print('[Epoch:{} Step:{}] <--> d_loss:{}  g_loss: {} g_real_loss:{}'
+              ' g_image_distance_loss: {}'
+              .format(epoch, i + 1, d_loss, g_loss, g_real_loss, g_image_distance_loss))
+        if i % 10 == 0:
+            add_to_summary(lab_two_rgb,
+                           lab_two_rgb_test, grey_image,
+                           d_loss, d_fake, d_real,
+                           g_loss, fake_image_lab, fake_image_test_lab,
+                           writer, x_batch, y_batch)
+        if i % 10 == 0:
+            if os.path.isfile(GEN_MODEL_PATH):
+                os.remove(GEN_MODEL_PATH)
+            if os.path.isfile(DISC_MODEL_PATH):
+                os.remove(DISC_MODEL_PATH)
+
+            torch.save(netg.state_dict(), GEN_MODEL_PATH)
+            torch.save(netd.state_dict(), DISC_MODEL_PATH)
 
         j += 1
         iteration += 1
-
-    if epoch % 5 == 0:
-        if os.path.isfile(GEN_MODEL_PATH):
-            os.remove(GEN_MODEL_PATH)
-        if os.path.isfile(DISC_MODEL_PATH):
-            os.remove(DISC_MODEL_PATH)
-
-        torch.save(netg.state_dict(), GEN_MODEL_PATH)
-        torch.save(netd.state_dict(), DISC_MODEL_PATH)
 
 writer.close()
