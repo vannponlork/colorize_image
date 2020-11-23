@@ -4,8 +4,8 @@
     - copy_data_convert_L.py: Copy image and convert to grey scale image
     - deploy_model_by_flask_pc.py : Deploy model to flask
     - predict_test.py : predict image
-    - nn4.py : training
-    - networknn4.py : Network
+    - nn13.py : training
+    - networknn13.py : Network
     
 
 ## Prerequisites
@@ -25,10 +25,10 @@ After downloading, put then under the `datasets` folder.
 - For this task I use 10000 image for dataset
 
 ### Training
-- To train the model, run `nn4.py`
+- To train the model, run `nn13.py`
 - Network is networknn4.py
 ```bash
-python3 nn4.py
+python3 nn13.py
 ```
 
 
