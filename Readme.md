@@ -30,10 +30,10 @@ After downloading, put then under the `datasets` folder.
 - For this task I use 10000 image for dataset
 
 ### Training
-- To train the model, run `nn13.py`
-- Network is networknn4.py
+- To train the model, run `nn19.py`
+- Network is networknn9.py
 ```bash
-python3 nn13.py
+python3 nn19.py
 ```
 
 
