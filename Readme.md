@@ -10,6 +10,7 @@
 	- Docker-build.sh
 	- Docker-run.sh
 	- http://yourip:5000
+    - to use flask in docker you have to copy model to colorize_flask/model
 	
 
 
