@@ -9,6 +9,8 @@
 - Docker: Run docker by run:
 	- Docker-build.sh
 	- Docker-run.sh
+	- http://yourip:5000
+	
 
 
 ## Prerequisite
