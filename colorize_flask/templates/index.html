@@ -1,0 +1,253 @@
+<html class="translated-ltr" xmlns="http://www.w3.org/1999/html"><head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Colorize image</title>
+      <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+      <link rel="stylesheet" href="/static/css/style.css">
+      <link rel="stylesheet" href="/static/css/fontawesome.min.css">
+      <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" charset="UTF-8" href="https://translate.googleapis.com/translate_static/css/translateelement.css">
+    <link type="text/css" rel="stylesheet" charset="UTF-8" href="https://translate.googleapis.com/translate_static/css/translateelement.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <script src="static/js/bootstrap.min.js"></script>
+
+    <script>
+            $(function() {
+                          $('#gallery img').click(function() {
+                          // document.getElementById("demo").innerHTML = $(this).attr("src")
+                          $.ajax({
+                              type: 'POST',
+                              url: '/predictga',
+
+                              data: JSON.stringify({ "data" : $(this).attr("src") }),
+                              contentType: false,
+                              cache: false,
+                              processData: false,
+                              success: function(data) {
+
+                                    var obj = JSON.parse(data);
+                                    // alert(obj.prediction);
+
+                                    document.getElementById("ori").src = obj.origin;
+                                    document.getElementById("preimg").src = obj.prediction;
+
+                                },
+                            });
+                        });
+                    });
+    </script>
+
+
+
+    <style>
+    div.gallery {
+      margin: 5px;
+      border: 1px solid #ccc;
+      float: left;
+      width: 180px;
+    }
+
+    div.gallery:hover {
+      border: 1px solid #777;
+      cursor: pointer;
+    }
+
+    div.gallery img {
+      width: 100%;
+      height: 120px;
+    }
+
+    div.desc {
+      padding: 15px;
+      text-align: center;
+    }
+
+
+</style>
+    <style>
+        div.cover_result {
+          background-color: #08547f;
+
+        }
+        div.result {
+          margin: 5px;
+          border: 1px solid #ccc;
+          float: left;
+
+        }
+
+        div.result:hover {
+          border: 1px solid #777;
+        }
+
+
+        div.desc {
+          padding: 15px;
+          text-align: center;
+        }
+
+
+    </style>
+
+</head>
+   <body>
+      <div id="header" class="header">
+         <nav class="navbar navbar-expand-lg navbar-light text-capitalize">
+            <div class="container">
+               <a class="navbar-brand" href="#"><h1>Colorize Image</h1></a>
+               <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#show-menu" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+               <span class="navbar-toggler-icon"></span>
+               </button>
+               <div class="collapse navbar-collapse" id="show-menu">
+                  <ul class="navbar-nav ml-auto">
+                     <li class="nav-item active">
+                        <a class="nav-link" href="#home">Home</a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#service">Service</a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#hiw">How it's Works</a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#wcs">What Clients Say</a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                     </li>
+                     <li class="nav-item .search-container">
+                        <a class="nav-link search" href="#"><i class="fas fa-search"></i></a>
+                        <form>
+                           <input type="search" placeholder="Search">
+                        </form>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         </nav>
+      </div>
+      <div id="home" class="slider">
+         <div id="main_slider" class="carousel slide" data-ride="carousel">
+            <ol class="carousel-indicators">
+               <li data-target="#main_slider" data-slide-to="0" class=""></li>
+               <li data-target="#main_slider" data-slide-to="1" class="active"></li>
+               <li data-target="#main_slider" data-slide-to="2"></li>
+            </ol>
+            <div class="carousel-inner">
+               
+               <div class="carousel-item active">
+                  <img class="d-block w-100" src="/static/imgs/slide1.jpg" alt="slider_img">
+                  <div class="ovarlay_slide_cont">
+                     <h2><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Colorize Image</font></font></h2>
+                     <h4>Black white to color image</h4>
+                     <p>Use your black white image to color it</p>
+
+
+
+                      <form id="fm" action="/predict" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="file" id="file" onchange="loadFile(event)" style="display: none;">
+                            <label class="btn btn-primary" for="file" style="cursor: pointer;">ChooseImage</label>
+                            <input type="text" class="form-control" id="imgUrl" placeholder="image URL">
+                            <p><input class="btn btn-primary" type="submit" value="Colorize">
+
+                      </form>
+
+                      <p id = "demo"></p>
+                      <span id="gallery">
+
+
+                          <div class="gallery">
+                            <a id="g1">
+                                <img id="imgg1" src="static/images/1.jpg" alt="Cinque Terre" width="600" height="200">
+                            </a>
+
+                          </div>
+                          <div class="gallery">
+                                <a id="g3">
+                                    <img src="static/images/2.jpg" alt="Forest" width="600" height="200">
+                                </a>
+
+                          </div>
+
+                          <div class="gallery">
+                                <a id="g4">
+                                    <img id="image_gallery1" src="static/images/3.jpg" alt="Northern Lights" width="600" height="200">
+                                </a>
+
+                          </div>
+
+                          <div class="gallery">
+                                <a id="g5">
+                                    <img src="static/images/4.jpg" alt="Mountains" width="600" height="200">
+                                </a>
+                          </div>
+                      </span>
+
+                  </div>
+               </div>
+            </div>
+            <a class="carousel-control-next" href="#main_slider" role="button" data-slide="next">
+            </a>
+         </div>
+      </div>
+
+        <div>
+         <div class="cover_result">
+            <div class="row" style="margin-left: 250px; width:1400px;">
+                        <div class="result">
+                            <img id = "ori" src="{{data}}">
+                        </div>
+                        <div class="result">
+                            <img id = "preimg" src="{{string_variable}}">
+                        </div>
+
+            </div>
+
+            </div>
+         </div>
+      <div id="about" class="about_section layout_padding">
+
+
+            </div>
+
+            </div>
+         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+      <div id="about" class="about_section layout_padding">
+         <div class="container">
+            <div class="row">
+               <div class="col-md-5">
+                  <h4>ABOUT COLORIZE IMAGE</h4>
+                  <h3 style="text-transform: none !important">We Build Colorize Image</h3>
+                  <p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed tempor and vitality, so that the labor and sorrow, some important things to do eiusmod. </font><font style="vertical-align: inherit;">Over the years, I will come, who will nostrud aliquip out of her the advantage of exercise, so that stimulus efforts if the school district and longevity. </font><font style="vertical-align: inherit;">Duis cillum, however, want to be a pain in the pleasure of football cupidatat flee from pain in the no pariatur.Lorem condemn the very ipsum dolor sit amet, consectetur adipiscing elit, sed tempor and vitality, so that the labor and sorrow, some important things to do eiusmod. </font><font style="vertical-align: inherit;">Over the years, I will come, who will nostrud aliquip out of her the advantage of exercise, so that stimulus efforts if the school district and longevity. </font><font style="vertical-align: inherit;">Want to be a pain in the cupidatat cillum has been criticized in the Duis et dolore magna flee produces no resultant pleasure.</font></font></p>
+               </div>
+               <div class="col-md-6 offset-md-1">
+                  <div class="full text_align_center">
+                     <img class="img-responsive" src="/static/imgs/about.png" alt="#">
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <footer>
+         <div class="copyright text-center">
+            <p>Copyright 2020  Design for colorize image <a href="#">Html Templates</a></p>
+         </div>
+      </footer>
+
+</body></html>
