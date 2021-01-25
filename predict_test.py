@@ -21,10 +21,8 @@ for r, d, f in os.walk(dirs):
             file_name.append(fi)
         delimiter += 1
 for j, image in enumerate(image_list):
-    resp = requests.post("http://192.168.33.2:5000/predict",
+    resp = requests.post("http://127.0.0.1:5000/predict",
                          files={"file": open(image, 'rb')})
-    # resp = requests.post("http://127.0.0.1:5000/predict",
-    #                      files={"file": open(image, 'rb')})
     img_mode = Image.open(image).mode
 
     if resp.status_code == 200:

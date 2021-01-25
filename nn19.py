@@ -46,6 +46,7 @@ def count_data(path):
                 i += 1
     return i
 
+
 if torch.cuda.is_available():
     dataroot_train = "../Dataset/dataset_color_image_gpu/train/"
     dataroot_test = "../Dataset/dataset_color_image_gpu/test/"
@@ -163,13 +164,9 @@ def add_to_summary(lab_two_rgb, lab_two_rgb_test,
     grid_ori = torchvision.utils.make_grid(x_batch)
     test_grid_ori = torchvision.utils.make_grid(y_batch)
     lab_two_rgb_test = torchvision.utils.make_grid(lab_two_rgb_test)
-
-
     writer.add_image('grey_image', gray_image, iteration)
     writer.add_image('RGB from Lab', lab_two_rgb, iteration)
     writer.add_image('generated Lab image', grid_gen, iteration)
-
-
     writer.add_image('test_generated', test_grid_gen, iteration)
     writer.add_image('RGB from Lab for test image', lab_two_rgb_test, iteration)
 
@@ -203,7 +200,6 @@ def convert_torch_tensor(x):
 def transform_image(image_bytes):
     my_transforms = transforms.Compose([
         transforms.Resize((256, 256)),
-        # transforms.CenterCrop(256),
         transforms.ToTensor(),
 
     ])
@@ -309,16 +305,7 @@ for epoch in range(my_epoch, num_epochs):
                 lab_two_rgb = merge_convert_lab2rgb(fake_image_lab)
                 fake_image_test_lab = torch.cat([grey_image_test, g_output_ab_test], 1)
                 lab_two_rgb_test = merge_convert_lab2rgb(fake_image_test_lab)
-                # if tmp <= 100:
-                #     for ix, img in enumerate(lab_two_rgb_test):
-                #         img = img.cpu().detach().numpy()
-                #         color_image = img.transpose((1, 2, 0))
-                #         with warnings.catch_warnings():
-                #             warnings.simplefilter("ignore")
-                #             fxn()
-                #             imsave(f'./images_predict/{ixs}_train.jpg', color_image)
-                #         ixs = ix + 1
-                #     tmp += 1
+
             add_to_summary(lab_two_rgb,
                            lab_two_rgb_test, grey_image,
                            d_loss, d_fake, d_real,

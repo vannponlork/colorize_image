@@ -10,13 +10,7 @@
 	- Docker-build.sh
 	- Docker-run.sh
 	- http://yourip:5000
-    - to use flask in docker you have to copy model to colorize_flask/model
-- MODEL
-    - Model can download from link below
-    - https://www.dropbox.com/sh/vkx5mzui9fr7f4f/AABavQy59X5JG0dvdSw8vMTDa?dl=0
-	
-
-
+    
 ## Prerequisite
 - Linux
 - pytorch
