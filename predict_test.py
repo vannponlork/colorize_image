@@ -29,8 +29,6 @@ for j, image in enumerate(image_list):
         img = np.asarray(json.loads(resp.text)['predictions'], dtype=np.float32)
         imsave('./images_predict/%s' % file_name[j], img)
         colorImage = Image.open('./images_predict/%s' % file_name[j])
-        # image_rotate = colorImage.transpose(Image.FLIP_LEFT_RIGHT)
-        # image_rotate = image_rotate.transpose(Image.ROTATE_90)
         image_rotate = colorImage
         image_rotate.save('./images_predictnn1/%s' % file_name[j])
     else:
