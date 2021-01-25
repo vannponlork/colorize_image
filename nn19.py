@@ -45,7 +45,6 @@ def count_data(path):
                 i += 1
     return i
 
-
 if torch.cuda.is_available():
     dataroot_train = "../Dataset/dataset_color_image_gpu/train/"
     dataroot_test = "../Dataset/dataset_color_image_gpu/test/"
