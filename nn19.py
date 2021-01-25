@@ -1,6 +1,5 @@
 from __future__ import print_function
 from skimage.color import lab2rgb, rgb2lab, rgb2gray
-from skimage.io import imsave
 import os
 import torch
 import torch.nn as nn
