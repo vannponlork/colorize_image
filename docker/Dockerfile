@@ -19,4 +19,4 @@ COPY colorize_flask /opt/colorize_flask/
 WORKDIR /opt/colorize_flask/
 
 CMD ["colorize.py"]
-ENTRYPOINT ["python"]ßß
+ENTRYPOINT ["python"]
