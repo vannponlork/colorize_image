@@ -9,7 +9,6 @@ from networknn19 import Generator
 from skimage.color import lab2rgb, rgb2lab, rgb2gray
 from skimage.transform import resize
 from skimage.io import imsave
-
 import warnings
 app = Flask(__name__)
 @app.route('/')
@@ -69,14 +68,12 @@ def predict():
     f = []
     print(request.method)
     if request.method == 'POST':
-        print(request.form)
-        print(request.url)
-        print(request.path)
-        print(request.files['file'])
         if 'file' not in request.files:
             print(request.url)
             return redirect(request.url)
         image = request.files['file']
+        tm = Image.open(image)
+        tmg = tm.convert('L')
         img = Image.open(image)
         if img.mode == 'L':
             img = img.convert('RGB')
@@ -105,7 +102,12 @@ def predict():
         j += 1
         image_names = './static/upload/{}'.format(imgName)
         ori_image_names = './static/upload/{}_{}'.format('ori', imgName)
-        return render_template('index.html', string_variable=image_names, data=ori_image_names)
+        if tm.mode == 'RGB':
+            tmg.save('./static/upload/{}_{}'.format('g', imgName))
+            g_image_names = './static/upload/{}_{}'.format('g', imgName)
+            return render_template('index.html', p_img=image_names, data=ori_image_names, limg=g_image_names)
+        else:
+            return render_template('index.html', p_img=image_names, data=ori_image_names)
 
 @app.route('/predictga', methods=['POST', 'GET'])
 def predictga():
