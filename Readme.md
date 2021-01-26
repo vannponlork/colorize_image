@@ -1,7 +1,6 @@
 # Image Colorization with DCGAN 
 
 - File:
-    - copy_data_convert_L.py: Copy image and convert to grey scale image
     - deploy_model_by_flask_pc.py : Deploy model to flask
     - predict_test.py : predict image
     - nn19.py : training
