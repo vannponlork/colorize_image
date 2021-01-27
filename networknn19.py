@@ -25,6 +25,7 @@ class Generator(nn.Module):
             nn.BatchNorm2d(ch_out),
             nn.LeakyReLU()
         )
+
     def unet_conv_transpose(self, ch_in, ch_out, kernel, stride, padding):
         return nn.Sequential(
             nn.ConvTranspose2d(ch_in, ch_out, kernel, stride, padding),

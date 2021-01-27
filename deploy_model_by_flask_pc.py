@@ -4,9 +4,8 @@ from flask import Flask, request
 import torch
 import numpy as np
 from PIL import Image
-import torch.nn as nn
-from networknn4 import Generator
-from skimage.color import lab2rgb, rgb2lab, rgb2gray
+from networknn19 import Generator
+from skimage.color import lab2rgb
 from skimage.transform import resize
 
 app = Flask(__name__)
@@ -21,7 +20,6 @@ model.load_state_dict(torch.load(GEN_MODEL_PATH, map_location=torch.device('cpu'
 def transform_image(image_bytes):
     my_transforms = transforms.Compose([
         transforms.Resize((256, 256)),
-        # transforms.CenterCrop(256),
         transforms.ToTensor(),
 
     ])

@@ -45,6 +45,7 @@ def count_data(path):
                 i += 1
     return i
 
+
 if torch.cuda.is_available():
     dataroot_train = "../Dataset/dataset_color_image_gpu/train/"
     dataroot_test = "../Dataset/dataset_color_image_gpu/test/"
@@ -242,6 +243,7 @@ def get_l_and_ab_color(x_batch):
         imgAb.append(img_ab)
         imgGray.append(img_original)
     return torch.stack(imgGray).to(device), torch.stack(imgAb).to(device)
+
 
 writer = SummaryWriter()
 netg.train()
