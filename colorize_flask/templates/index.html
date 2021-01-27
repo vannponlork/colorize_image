@@ -25,20 +25,17 @@
                               cache: false,
                               processData: false,
                               success: function(data) {
-
                                     var obj = JSON.parse(data);
                                     // alert(obj.prediction);
-
                                     document.getElementById("ori").src = obj.origin;
                                     document.getElementById("preimg").src = obj.prediction;
+                                    document.getElementById("limg").src = "";
 
                                 },
                             });
                         });
                     });
     </script>
-
-
 
     <style>
     div.gallery {
@@ -145,9 +142,6 @@
                      <h2><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Colorize Image</font></font></h2>
                      <h4>Black white to color image</h4>
                      <p>Use your black white image to color it</p>
-
-
-
                       <form id="fm" action="/predict" method="POST" enctype="multipart/form-data">
                             <input type="file" name="file" id="file" onchange="loadFile(event)" style="display: none;">
                             <label class="btn btn-primary" for="file" style="cursor: pointer;">ChooseImage</label>
@@ -155,11 +149,8 @@
                             <p><input class="btn btn-primary" type="submit" value="Colorize">
 
                       </form>
-
                       <p id = "demo"></p>
                       <span id="gallery">
-
-
                           <div class="gallery">
                             <a id="g1">
                                 <img id="imgg1" src="static/images/1.jpg" alt="Cinque Terre" width="600" height="200">

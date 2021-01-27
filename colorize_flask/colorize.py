@@ -29,10 +29,12 @@ use_cuda = True if (torch.cuda.is_available() and n_gpu > 0) else False
 
 device = torch.device("cuda:0" if use_cuda else "cpu")
 model = Generator(n_gpu, use_cuda).to(device)
-# GEN_MODEL_PATH = '/opt/colorize_flask/model/gen.pt'
 GEN_MODEL_PATH = 'model/gen.pt'
 with torch.no_grad():
-    model.load_state_dict(torch.load(GEN_MODEL_PATH, map_location=torch.device('cpu')))
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(GEN_MODEL_PATH))
+    else:
+        model.load_state_dict(torch.load(GEN_MODEL_PATH, map_location=torch.device('cpu')))
     model.eval()
 
 def get_limg(x_batch):
@@ -68,47 +70,47 @@ def predict():
     f = []
     print(request.method)
     if request.method == 'POST':
-        if 'file' not in request.files:
-            print(request.url)
-            return redirect(request.url)
-        image = request.files['file']
-        tm = Image.open(image)
-        tmg = tm.convert('L')
-        img = Image.open(image)
-        if img.mode == 'L':
-            img = img.convert('RGB')
-        ori_img = img
-        imgName = image.filename
-        origin_img_l = Image.open(image).convert('L')
-        origin_img = transforms.ToTensor()(origin_img_l).unsqueeze(0)
-        w, h = img.size
-        tf = transform_image(img).to(device)
-        limg, cab = get_limg(tf)
-        img_ab = model(limg).cpu().detach().numpy()
-        img_ab = img_ab[0].transpose([1, 2, 0])
-        img_ab = resize(img_ab, (h, w))
-        img_ab = np.float32(img_ab)
-        img_ab = transforms.ToTensor()(img_ab).unsqueeze(0)
-        color_image = torch.cat((origin_img, img_ab), 1).cpu().detach().numpy()
-        color_image = color_image[0].transpose((1, 2, 0))  # rescale for matplotlib
-        color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100
-        color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
-        color_image = lab2rgb(color_image.astype(np.float64))
+        if request.files['file'].filename != '':
+            print(request.files['file'].filename)
+            image = request.files['file']
+            tm = Image.open(image)
+            tmg = tm.convert('L')
+            img = Image.open(image)
+            if img.mode == 'L':
+                img = img.convert('RGB')
+            ori_img = img
+            imgName = image.filename
+            origin_img_l = Image.open(image).convert('L')
+            origin_img = transforms.ToTensor()(origin_img_l).unsqueeze(0)
+            w, h = img.size
+            tf = transform_image(img).to(device)
+            limg, cab = get_limg(tf)
+            img_ab = model(limg).cpu().detach().numpy()
+            img_ab = img_ab[0].transpose([1, 2, 0])
+            img_ab = resize(img_ab, (h, w))
+            img_ab = np.float32(img_ab)
+            img_ab = transforms.ToTensor()(img_ab).unsqueeze(0)
+            color_image = torch.cat((origin_img, img_ab), 1).cpu().detach().numpy()
+            color_image = color_image[0].transpose((1, 2, 0))  # rescale for matplotlib
+            color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100
+            color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
+            color_image = lab2rgb(color_image.astype(np.float64))
 
-        img_array = json.dumps({'predictions': color_image.tolist()})
-        img = np.asarray(json.loads(img_array)['predictions'], dtype=np.float32)
-        imsave('./static/upload/{}'.format(imgName), img)
-        ori_img.save('./static/upload/{}_{}'.format('ori', imgName))
-        j += 1
-        image_names = './static/upload/{}'.format(imgName)
-        ori_image_names = './static/upload/{}_{}'.format('ori', imgName)
-        if tm.mode == 'RGB':
-            tmg.save('./static/upload/{}_{}'.format('g', imgName))
-            g_image_names = './static/upload/{}_{}'.format('g', imgName)
-            return render_template('index.html', p_img=image_names, data=ori_image_names, limg=g_image_names)
+            img_array = json.dumps({'predictions': color_image.tolist()})
+            img = np.asarray(json.loads(img_array)['predictions'], dtype=np.float32)
+            imsave('./static/upload/{}'.format(imgName), img)
+            ori_img.save('./static/upload/{}_{}'.format('ori', imgName))
+            j += 1
+            image_names = './static/upload/{}'.format(imgName)
+            ori_image_names = './static/upload/{}_{}'.format('ori', imgName)
+            if tm.mode == 'RGB':
+                tmg.save('./static/upload/{}_{}'.format('g', imgName))
+                g_image_names = './static/upload/{}_{}'.format('g', imgName)
+                return render_template('index.html', p_img=image_names, data=ori_image_names, limg=g_image_names)
+            else:
+                return render_template('index.html', p_img=image_names, data=ori_image_names)
         else:
-            return render_template('index.html', p_img=image_names, data=ori_image_names)
-
+            return render_template('index.html')
 @app.route('/predictga', methods=['POST', 'GET'])
 def predictga():
     j = 1
