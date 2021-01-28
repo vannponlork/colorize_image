@@ -7,9 +7,10 @@
     - nn19.py : training
     - networknn19.py : Network
 - Docker: Run docker by run:
-	- Docker-build.sh
-	- Docker-run.sh
-	- http://yourip:5000
+    - $ cd docker
+    - $ ./docker-build.sh
+    - $ ./docker-run.sh
+    - And access to http://localhost:5000/
     
 ## Prerequisite
 - Linux
